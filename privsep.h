@@ -10,17 +10,7 @@
 typedef uint8_t u8;
 #define SSID_MAX_LEN 32
 
-struct wpa_driver_privsep_data {
-    void *ctx;
-    u8 own_addr[ETH_ALEN];
-    int priv_socket;
-    char *own_socket_path;
-    int cmd_socket;
-    char *own_cmd_path;
-    struct sockaddr_un priv_addr;
-    char ifname[16];
-};
-
+struct wpa_driver_privsep_data;
 
 struct privsep_cmd_authenticate
 {
@@ -57,8 +47,8 @@ struct privsep_cmd_associate
     /* followed by wpa_ie_len bytes of wpa_ie */
 };
 
-void *wpa_driver_privsep_new(const char *ifname, const char *param);
-int wpa_driver_privsep_authenticate(void *priv, struct privsep_cmd_authenticate *params);
-int wpa_driver_privsep_associate(void *priv, struct privsep_cmd_associate *data);
+struct wpa_driver_privsep_data *wpa_driver_privsep_new(const char *ifname, const char *param);
+int wpa_driver_privsep_authenticate(struct wpa_driver_privsep_data *priv, struct privsep_cmd_authenticate *params);
+int wpa_driver_privsep_associate(struct wpa_driver_privsep_data *priv, struct privsep_cmd_associate *data);
 
 #endif /* end of include guard: PRIVSEP_H_GQETV4OL */

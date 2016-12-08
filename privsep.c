@@ -45,7 +45,6 @@ enum privsep_cmd {
     PRIVSEP_CMD_AUTHENTICATE,
 };
 
-/*
 struct wpa_driver_privsep_data {
     void *ctx;
     u8 own_addr[ETH_ALEN];
@@ -56,7 +55,6 @@ struct wpa_driver_privsep_data {
     struct sockaddr_un priv_addr;
     char ifname[16];
 };
-*/
 
 enum {
     MSG_EXCESSIVE, MSG_MSGDUMP, MSG_DEBUG, MSG_INFO, MSG_WARNING, MSG_ERROR
@@ -95,17 +93,21 @@ static int wpa_priv_cmd(struct wpa_driver_privsep_data *drv, int cmd,
     io[0].iov_len = sizeof(cmd);
     io[1].iov_base = (u8 *) data;
     io[1].iov_len = data_len;
+#ifdef DEBUG
     printf("io0.iov_base = %p, io0.iov_len = %d\n", io[0].iov_base, io[0].iov_len);
     printf("cmd = %d\n", cmd);
     printf("io1.iov_base = %p, io1.iov_len = %d\n", io[1].iov_base, io[1].iov_len);
+#endif
 
     os_memset(&msg, 0, sizeof(msg));
     msg.msg_iov = io;
     msg.msg_iovlen = data ? 2 : 1;
     msg.msg_name = &drv->priv_addr;
     msg.msg_namelen = sizeof(drv->priv_addr);
+#ifdef DEBUG
     printf("drv->cmd_socket = %d, iov = %p, iovlen = %d, msg_name = %p, priv_addr = %s, msg_namelen = %d\n",
            drv->cmd_socket, msg.msg_iov, msg.msg_iovlen, msg.msg_name, drv->priv_addr.sun_path, msg.msg_namelen);
+#endif
 
     if (sendmsg(drv->cmd_socket, &msg, 0) < 0) {
         wpa_printf(MSG_ERROR, "sendmsg(cmd_socket): %s",
@@ -158,7 +160,7 @@ static int wpa_priv_reg_cmd(struct wpa_driver_privsep_data *drv, int cmd)
     return res < 0 ? -1 : 0;
 }
 
-void *wpa_driver_privsep_new(const char *ifname, const char *param)
+struct wpa_driver_privsep_data *wpa_driver_privsep_new(const char *ifname, const char *param)
 {
     struct wpa_driver_privsep_data *drv = os_zalloc(sizeof(struct wpa_driver_privsep_data));
     const char *pos;
@@ -236,7 +238,9 @@ void *wpa_driver_privsep_new(const char *ifname, const char *param)
     drv->priv_addr.sun_family = AF_UNIX;
     os_snprintf(drv->priv_addr.sun_path, sizeof(drv->priv_addr.sun_path),
                 "%s/%s", priv_dir, drv->ifname);
+#ifdef DEBUG
     printf("ifname: %s, priv_dir: %s\n", drv->ifname, priv_dir);
+#endif
     os_free(priv_dir);
 
     drv->priv_socket = socket(PF_UNIX, SOCK_DGRAM, 0);
@@ -262,7 +266,9 @@ void *wpa_driver_privsep_new(const char *ifname, const char *param)
         drv->own_socket_path = NULL;
         goto failure;
     }
+#ifdef DEBUG
     printf("own_socket_path: %s\n", drv->own_socket_path);
+#endif
 
 #ifdef PRIVSEP_RECV
     eloop_register_read_sock(drv->priv_socket, wpa_driver_privsep_receive,
@@ -292,7 +298,9 @@ void *wpa_driver_privsep_new(const char *ifname, const char *param)
         drv->own_cmd_path = NULL;
         goto failure;
     }
+#ifdef DEBUG
     printf("own_cmd_path: %s\n", drv->own_cmd_path);
+#endif
 
     if (wpa_priv_reg_cmd(drv, PRIVSEP_CMD_REGISTER) < 0) {
         wpa_printf(MSG_ERROR, "Failed to register with wpa_priv");
@@ -307,7 +315,7 @@ failure:
     return NULL;
 }
 
-int wpa_driver_privsep_associate(void *priv, struct privsep_cmd_associate *data)
+int wpa_driver_privsep_associate(struct wpa_driver_privsep_data *priv, struct privsep_cmd_associate *data)
 {
     struct wpa_driver_privsep_data *drv = priv;
     const struct privsep_cmd_associate *params = data;
@@ -329,7 +337,7 @@ int wpa_driver_privsep_associate(void *priv, struct privsep_cmd_associate *data)
     return res;
 }
 
-int wpa_driver_privsep_authenticate(void *priv, struct privsep_cmd_authenticate *params)
+int wpa_driver_privsep_authenticate(struct wpa_driver_privsep_data *priv, struct privsep_cmd_authenticate *params)
 {
     struct wpa_driver_privsep_data *drv = priv;
     struct privsep_cmd_authenticate *data = params;
