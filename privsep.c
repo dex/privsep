@@ -315,11 +315,10 @@ failure:
     return NULL;
 }
 
-int wpa_driver_privsep_associate(struct wpa_driver_privsep_data *priv, struct privsep_cmd_associate *data)
+int wpa_driver_privsep_associate(struct wpa_driver_privsep_data *priv, struct privsep_cmd_associate *params)
 {
     struct wpa_driver_privsep_data *drv = priv;
-    const struct privsep_cmd_associate *params = data;
-    //struct privsep_cmd_associate *data;
+    const struct privsep_cmd_associate *data = params;
     int res;
     size_t buflen;
 

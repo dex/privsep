@@ -121,7 +121,7 @@ int main(int argc, char *argv[])
         priv_auth.ssid_len = ssid_len;
         priv_auth.auth_alg = 1;
 
-        printf("AUTH: freq:%d, ssid:%s, ssid_len:%d\n", priv_auth.freq, priv_auth.ssid, priv_auth.ssid_len);
+        printf("AUTH: freq:%d, ssid:%s, ssid_len:%lu\n", priv_auth.freq, priv_auth.ssid, priv_auth.ssid_len);
 
         wpa_driver_privsep_authenticate(priv, &priv_auth);
     } else if (assoc) {
@@ -131,7 +131,7 @@ int main(int argc, char *argv[])
         priv_assoc.hwmode = 0;
         priv_assoc.freq = 2412;
 
-        printf("ASSOC: freq:%d, ssid:%s, ssid_len:%d\n", priv_assoc.freq, priv_assoc.ssid, priv_assoc.ssid_len);
+        printf("ASSOC: freq:%d, ssid:%s, ssid_len:%lu\n", priv_assoc.freq, priv_assoc.ssid, priv_assoc.ssid_len);
 
         wpa_driver_privsep_associate(priv, &priv_assoc);
     }
