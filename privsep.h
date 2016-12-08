@@ -50,5 +50,6 @@ struct privsep_cmd_associate
 struct wpa_driver_privsep_data *wpa_driver_privsep_new(const char *ifname, const char *param);
 int wpa_driver_privsep_authenticate(struct wpa_driver_privsep_data *priv, struct privsep_cmd_authenticate *params);
 int wpa_driver_privsep_associate(struct wpa_driver_privsep_data *priv, struct privsep_cmd_associate *data);
+int wpa_driver_privsep_scan(struct wpa_driver_privsep_data *priv, const u8 *ssid, ssize_t ssid_len);
 
 #endif /* end of include guard: PRIVSEP_H_GQETV4OL */

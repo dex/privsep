@@ -1,6 +1,7 @@
 #include <arpa/inet.h>
 #include <errno.h>
 #include <netinet/in.h>
+#include <netinet/ether.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdarg.h>
@@ -66,7 +67,17 @@ static const char * hwaddr_parse(const char *txt, u8 *addr)
  */
 int hwaddr_aton(const char *txt, u8 *addr)
 {
+#ifdef HWADDR_PARSE
     return hwaddr_parse(txt, addr) ? 0 : -1;
+#else
+    struct ether_addr *mac = ether_aton(txt);
+    if (mac) {
+        memcpy(addr, mac->ether_addr_octet, ETH_ALEN);
+        return 0;
+    } else {
+        return -1;
+    }
+#endif
 }
 
 
@@ -79,7 +90,7 @@ int main(int argc, char *argv[])
 
     u8 bssid[6];
     u8 ssid[33];
-    int c, freq, auth, assoc, ssid_len;
+    int c = 0, freq = 0, auth = 0, assoc = 0, ssid_len = 0, scan = 0, delay = 3;
 
     memset(&priv_auth, 0, sizeof(priv_auth));
     memset(&priv_assoc, 0, sizeof(priv_assoc));
@@ -87,7 +98,7 @@ int main(int argc, char *argv[])
 
     for (;;) {
         c = getopt(argc, argv,
-                   "b:aA:S:F");
+                   "b:aAS:F:sd:");
         if (c < 0)
             break;
         switch (c) {
@@ -107,11 +118,23 @@ int main(int argc, char *argv[])
                 break;
             case 'F':
                 //        freq = atoi(optarg);
-                //        break;
+                break;
+            case 's':
+                scan = 1;
+                break;
+            case 'd':
+                delay = atoi(optarg);
+                break;
             default:
                 exit(1);
                 break;
         }
+    }
+
+    if (scan) {
+        wpa_driver_privsep_scan(priv, ssid, ssid_len);
+        printf("SCAN: ssid:%s, ssid_len:%lu, delay:%d\n", ssid, ssid_len, delay);
+        sleep(delay);
     }
 
     if (auth) {

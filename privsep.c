@@ -322,9 +322,9 @@ int wpa_driver_privsep_associate(struct wpa_driver_privsep_data *priv, struct pr
     int res;
     size_t buflen;
 
-    wpa_printf(MSG_DEBUG, "%s: priv=%p freq=%d pairwise_suite=%d "
+    wpa_printf(MSG_DEBUG, "%s: priv=%p freq=%d bssid=" MACSTR " pairwise_suite=%d "
                "group_suite=%d key_mgmt_suite=%d auth_alg=%d mode=%d",
-               __func__, priv, params->freq, params->pairwise_suite,
+               __func__, priv, params->freq, MAC2STR(params->bssid), params->pairwise_suite,
                params->group_suite, params->key_mgmt_suite,
                params->auth_alg, params->mode);
 
@@ -354,4 +354,11 @@ int wpa_driver_privsep_authenticate(struct wpa_driver_privsep_data *priv, struct
                        NULL, NULL);
 
     return res;
+}
+
+int wpa_driver_privsep_scan(struct wpa_driver_privsep_data *priv, const u8 *ssid, ssize_t ssid_len)
+{
+    struct wpa_driver_privsep_data *drv = priv;
+    return wpa_priv_cmd(drv, PRIVSEP_CMD_SCAN, ssid, ssid_len,
+                        NULL, NULL);
 }
